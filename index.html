@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Will you be my Valentine?</title>
+  <title>Will you be my Valentine? </title>
 
   <!-- Confetti library -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
     :root {
-      --bg1: #ffd6e7;
-      --bg2: #ffeef6;
-      --card: #ffffffcc;
+      --bg1: #ff5252;
+      --bg2: #c00000;
+      --card: #ffbfd3;
       --yes: #ff3b7a;
       --yesHover: #ff1f68;
     }
@@ -45,6 +45,7 @@
       padding: 26px 22px;
       background: var(--card);
       backdrop-filter: blur(10px);
+      position: relative;
       border-radius: 22px;
       text-align: center;
       box-shadow: 0 18px 60px rgba(0,0,0,.15);
@@ -56,6 +57,30 @@
       display: block;
       filter: drop-shadow(0 10px 14px rgba(0,0,0,.12));
     }
+
+    /* container for user-supplied artwork */
+    .art-container { text-align: center; }
+    .user-art {
+      width: min(260px, 80vw);
+      height: auto;
+      display: block;
+      margin: 0 auto 10px;
+      transform: rotate(-90deg);
+      transform-origin: center;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.12));
+    }
+    .file-label {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.9);
+      color: #111827;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0,0,0,.12);
+    }
+    input[type="file"].file-input { display: none; }
 
     h1 {
       font-size: clamp(26px, 4vw, 44px);
@@ -116,6 +141,8 @@
       margin: 10px 0;
     }
 
+    /* flowers removed */
+
     .fireworks {
       width: min(380px, 90vw);
       margin: 0 auto;
@@ -133,45 +160,14 @@
   <canvas id="confettiCanvas"></canvas>
 
   <main class="card">
-    <!-- ANIMAL WITH HEART -->
-    <svg class="art" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="fur" x1="0" x2="1">
-          <stop offset="0" stop-color="#f7c7a1"/>
-          <stop offset="1" stop-color="#f2a97b"/>
-        </linearGradient>
-        <linearGradient id="heart" x1="0" x2="1">
-          <stop offset="0" stop-color="#ff4d7d"/>
-          <stop offset="1" stop-color="#ff1f68"/>
-        </linearGradient>
-      </defs>
+    <!-- USER ART: place your image file in the same folder as this HTML
+         and name it one of: art-default.png, art-default.jpg, art-default.jpeg,
+         art-default.webp or art-default.gif — the page will load it automatically. -->
+    <div class="art-container">
+      <img id="userArt" class="user-art" alt="Your artwork" style="display:none" />
+    </div>
 
-      <path d="M250 50 C250 33 270 25 282 38
-               C294 25 314 33 314 50
-               C314 78 282 92 282 106
-               C282 92 250 78 250 50Z"
-            fill="url(#heart)"/>
-
-      <path d="M90 120 C90 70 140 40 190 60
-               C240 40 290 70 290 120
-               C290 180 240 210 190 210
-               C140 210 90 180 90 120Z"
-            fill="url(#fur)"/>
-
-      <path d="M110 92 L95 55 L140 78 Z" fill="#f2a97b"/>
-      <path d="M270 92 L285 55 L240 78 Z" fill="#f2a97b"/>
-
-      <circle cx="160" cy="130" r="8"/>
-      <circle cx="220" cy="130" r="8"/>
-
-      <path d="M190 144 C186 144 182 148 182 152
-               C182 160 190 164 190 170
-               C190 164 198 160 198 152
-               C198 148 194 144 190 144Z"
-            fill="#ff7aa2"/>
-    </svg>
-
-    <h1>nirali will you be my valentine?</h1>
+    <h1>Valerie, will you be my valentine? 😁😁</h1>
 
     <section class="button-zone" id="zone">
       <button id="yesBtn">Yes</button>
@@ -179,13 +175,13 @@
     </section>
 
     <!-- HINT -->
-    <div class="hint" id="hint">“No” seems a bit shy 😈</div>
+    <div class="hint" id="hint">No must not like you 😅</div>
 
     <section class="result" id="result">
-      <h2>YAY! 🎉</h2>
+      <h2>LETS GO!🎉</h2>
       <img
         class="fireworks"
-        src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif"
+        src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExaXB0OGFia3E3c3ZkZ3c2dHYxOW9hYjl1a3NweHB3aHdid2I4bDZxYSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q/nXxOjZrbnbRxS/giphy.gif"
         alt="Fireworks"
       />
     </section>
@@ -197,6 +193,42 @@
     const noBtn = document.getElementById("noBtn");
     const result = document.getElementById("result");
     const hint = document.getElementById("hint");
+
+    // Mobile-only behavior: on mobile, allow No to be clicked and
+    // make Yes grow when No is clicked; No should not run away when clicked.
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent || '');
+    let suppressNoMove = false;
+    try {
+      if (isMobile) {
+        // allow interaction on mobile
+        noBtn.style.pointerEvents = 'auto';
+        noBtn.removeAttribute('disabled');
+        noBtn.tabIndex = 0;
+
+        noBtn.addEventListener('pointerdown', () => {
+          // suppress movement briefly so click can register without fleeing
+          suppressNoMove = true;
+          setTimeout(() => { suppressNoMove = false; }, 700);
+        });
+
+        noBtn.addEventListener('click', (e) => {
+          try { e.preventDefault(); } catch(_){}
+          // grow Yes quickly when No is clicked
+          growYes(6);
+          // change header text
+          const title = document.querySelector('h1');
+          if (title) title.textContent = 'why would u say no ☹️☹️';
+        });
+      } else {
+        // non-mobile: keep No disabled and unclickable
+        noBtn.disabled = true;
+        noBtn.style.pointerEvents = 'none';
+        noBtn.setAttribute('aria-disabled', 'true');
+        noBtn.tabIndex = -1;
+        noBtn.addEventListener('click', e => { e.preventDefault(); e.stopImmediatePropagation(); }, { capture: true });
+        noBtn.addEventListener('keydown', e => { e.preventDefault(); e.stopImmediatePropagation(); }, { capture: true });
+      }
+    } catch (err) { /* defensive: if element missing, ignore */ }
 
     /* ---------- CONFETTI ---------- */
     const confettiCanvas = document.getElementById("confettiCanvas");
@@ -243,12 +275,22 @@
       }, 300);
     }
 
-    /* ---------- YES BUTTON GROWS ---------- */
-    let yesScale = 1;
+    /* ---------- YES BUTTON: grow continuously until clicked ---------- */
+    let growScale = 1;
+    let growRaf = null;
     function growYes() {
-      yesScale = Math.min(2.2, yesScale + 0.1);
-      yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
+      // called from other interactions; increment the logical scale
+      growScale += 0.07;
     }
+
+    // continuous animator that applies the current growScale every frame
+    function applyGrowth() {
+      yesBtn.style.transform = `translateY(-50%) scale(${growScale})`;
+      growRaf = requestAnimationFrame(applyGrowth);
+    }
+
+    // start growing immediately; it will keep increasing until we cancel the RAF
+    applyGrowth();
 
     /* ---------- NO BUTTON RUNS AWAY ---------- */
     function clamp(n, min, max) {
@@ -291,13 +333,39 @@
 
     /* ---------- YES CLICK ---------- */
     yesBtn.addEventListener("click", () => {
+      // stop the growth immediately so the click registers and visuals are stable
+      try { cancelAnimationFrame(growRaf); } catch (e) { /* ignore */ }
       zone.style.display = "none";
       hint.style.display = "none";     // HIDE THE HINT
+      // hide the title header
+      const title = document.querySelector('h1');
+      if (title) title.style.display = 'none';
+
       result.style.display = "block";
       resizeConfettiCanvas();
       fullScreenConfetti();
     });
+
+    /* ---------- AUTO-LOAD local art-default.* file (no chooser) ---------- */
+    (function() {
+      const userArt = document.getElementById('userArt');
+      const candidates = ['art-default.png', 'art-default.jpg', 'art-default.jpeg', 'art-default.webp', 'art-default.gif'];
+      let loaded = false;
+      candidates.forEach(name => {
+        if (loaded) return;
+        const img = new Image();
+        img.onload = () => {
+          if (loaded) return;
+          loaded = true;
+          userArt.src = name;
+          userArt.style.display = 'block';
+        };
+        img.onerror = () => { /* not found — try next */ };
+        img.src = name;
+      });
+    })();
   </script>
+  <!-- YouTube player removed -->
 </body>
 </html>
 
