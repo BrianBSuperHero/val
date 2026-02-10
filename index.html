@@ -8,6 +8,9 @@
   <!-- Confetti library -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
+  <!-- Tenor embed script -->
+  <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+
   <style>
     :root {
       --bg1: #ff5252;
@@ -24,7 +27,7 @@
       min-height: 100svh;
       display: grid;
       place-items: center;
-      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
+      background: linear-gradient(135deg, #FF6F77 0%, #FF3334 50%, #C00000 100%);
       font-family: system-ui, sans-serif;
       overflow: hidden;
       padding: 16px;
@@ -42,7 +45,7 @@
 
     .card {
       width: min(720px, 92vw);
-      padding: 26px 22px;
+      padding: 16px 22px;
       background: var(--card);
       backdrop-filter: blur(10px);
       position: relative;
@@ -55,6 +58,19 @@
       width: min(260px, 80vw);
       margin: 0 auto 10px;
       display: block;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.12));
+    }
+
+    .gif-container {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .gif-image {
+      width: min(260px, 80vw);
+      height: auto;
+      display: block;
+      margin: 0 auto;
       filter: drop-shadow(0 10px 14px rgba(0,0,0,.12));
     }
 
@@ -132,13 +148,29 @@
 
     .result {
       display: none;
-      margin-top: 18px;
+      margin-top: 10px;
       animation: pop .35s ease;
+      width: 100%;
+      text-align: center;
     }
 
     .result h2 {
       font-size: clamp(30px, 4.5vw, 46px);
-      margin: 10px 0;
+      margin: 5px 0 15px 0;
+    }
+
+    .result img {
+      max-width: 100%;
+      height: auto;
+      margin: 10px auto;
+      display: block;
+    }
+
+    .tenor-gif-embed {
+      display: block !important;
+      text-align: center;
+      margin: 10px auto !important;
+      padding: 0 !important;
     }
 
     /* flowers removed */
@@ -147,6 +179,13 @@
       width: min(380px, 90vw);
       margin: 0 auto;
       display: block;
+    }
+
+    .tenor-gif-embed {
+      display: flex;
+      justify-content: center;
+      margin: 0 auto;
+      max-width: 90vw;
     }
 
     @keyframes pop {
@@ -160,12 +199,13 @@
   <canvas id="confettiCanvas"></canvas>
 
   <main class="card">
-    <!-- USER ART: place your image file in the same folder as this HTML
-         and name it one of: art-default.png, art-default.jpg, art-default.jpeg,
-         art-default.webp or art-default.gif — the page will load it automatically. -->
-    <div class="art-container">
-      <img id="userArt" class="user-art" alt="Your artwork" style="display:none" />
+    <!-- GIF container: place your gif file in the same folder as this HTML
+         and name it: gif-default.gif — the page will load it automatically. -->
+    <div class="gif-container">
+      <img id="gifImage" class="gif-image" alt="Animation" style="display:none" />
     </div>
+
+    <!-- USER ART: hidden on first page, will show in result -->
 
     <h1>Valerie, will you be my valentine? 😁😁</h1>
 
@@ -179,11 +219,8 @@
 
     <section class="result" id="result">
       <h2>LETS GO!🎉</h2>
-      <img
-        class="fireworks"
-        src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExaXB0OGFia3E3c3ZkZ3c2dHYxOW9hYjl1a3NweHB3aHdid2I4bDZxYSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q/nXxOjZrbnbRxS/giphy.gif"
-        alt="Fireworks"
-      />
+      <img id="userArt" class="user-art" alt="Your artwork" />
+      <div class="tenor-gif-embed" data-postid="10446322946687645380" data-share-method="host" data-aspect-ratio="0.81875" data-width="60%"><a href="https://tenor.com/view/baby-dancing-oh-yeah-gif-10446322946687645380">Baby Dancing GIF</a>from <a href="https://tenor.com/search/baby-gifs">Baby GIFs</a></div>
     </section>
   </main>
 
@@ -340,6 +377,9 @@
       // hide the title header
       const title = document.querySelector('h1');
       if (title) title.style.display = 'none';
+      // hide the gif
+      const gifImage = document.getElementById('gifImage');
+      if (gifImage) gifImage.style.display = 'none';
 
       result.style.display = "block";
       resizeConfettiCanvas();
@@ -363,6 +403,18 @@
         img.onerror = () => { /* not found — try next */ };
         img.src = name;
       });
+    })();
+
+    /* ---------- AUTO-LOAD local gif-default.gif file ---------- */
+    (function() {
+      const gifImage = document.getElementById('gifImage');
+      const img = new Image();
+      img.onload = () => {
+        gifImage.src = 'gif-default.gif';
+        gifImage.style.display = 'block';
+      };
+      img.onerror = () => { /* not found — user will need to add the gif */ };
+      img.src = 'gif-default.gif';
     })();
   </script>
   <!-- YouTube player removed -->
